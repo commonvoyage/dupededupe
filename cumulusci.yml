@@ -1,0 +1,27 @@
+minimum_cumulusci_version: '2.5.4'
+project:
+    name: dupededupe
+    package:
+        name:  dupededupe
+        namespace: dupededupe
+        api_version: '46.0'
+    test:
+        name_match: '%Test%'
+    source_format: sfdx
+
+tasks:
+    robot:
+        options:
+            suites: robot/dupededupe/tests
+            options:
+                outputdir: robot/dupededupe/results
+
+    robot_testdoc:
+        options:
+            path: robot/dupededupe/tests
+            output: robot/dupededupe/doc/dupededupe_tests.html
+
+flows:
+    config_qa:
+        1.1:
+            task: deploy_qa_config
