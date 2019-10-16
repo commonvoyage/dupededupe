@@ -6,7 +6,7 @@ public without sharing class FindDuplicates {
     /*Query existing duplicates*/
     public FindDuplicates(List<SObject> objects) {
         results = Datacloud.FindDuplicates.findDuplicates(objects);
-        existingDuplicateRecordSets = FindDuplicatesSelector.selectDuplicateRecordSets(objects);
+        //existingDuplicateRecordSets = FindDuplicatesSelector.selectDuplicateRecordSets(objects);
 
         for (Datacloud.FindDuplicatesResult findDupeResult : results) {
             /*

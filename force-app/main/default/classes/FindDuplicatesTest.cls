@@ -1,11 +1,12 @@
 @isTest
 private class FindDuplicatesTest {
     @isTest
-    private static void FindDuplicatesTest() {}
+    private static void FindDuplicatesTest() {
+    }
 
     @isTest
-    private static void insertDuplicateRecordSet(List<Account> accounts) {
-
+    private static void insertDuplicateRecordSet() { 
+        List<Account> accounts = new List<Account>();
         // you need at least one active duplicate rule
         DuplicateRule rule = [SELECT Id FROM DuplicateRule WHERE SObjectType = 'Account' AND IsActive = true LIMIT 1];
 
