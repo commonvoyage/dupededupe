@@ -15,7 +15,7 @@ public without sharing class FindDuplicatesBatch implements Database.Batchable<s
 
     public Database.QueryLocator start(Database.BatchableContext bc) {
         String query = 'SELECT Id FROM ' + dedupObject;
-        if (!String.isBlank(whereClause)) {
+        if (String.isNotBlank(whereClause)) {
             query += ' ' + whereClause;
         } else {
             //is this a good idea when there are multiple different duplicate rules?
@@ -32,7 +32,8 @@ public without sharing class FindDuplicatesBatch implements Database.Batchable<s
         dml.DuplicateRuleHeader.allowSave = true;
         dml.optAllOrNone = false;
 
-        Database.update(objects, dml);
+        //Database.update(objects, dml);
+        new FindDuplicates(objects);
     }
 
     public void finish(Database.BatchableContext BC) {}
