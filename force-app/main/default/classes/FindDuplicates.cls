@@ -1,4 +1,18 @@
 public without sharing class FindDuplicates {
+    public Map<String, DuplicateRule> duplicateRules {
+        public get {
+            if (duplicateRules == null) {
+                duplicateRules = new Map<String, DuplicateRule>();
+                
+                List<DuplicateRule> dupeRules = [SELECT Id, DeveloperName FROM DuplicateRule];
+                for (DuplicateRule dr : dupeRules) {
+                    duplicateRules.put(dr.DeveloperName, dr);
+                }
+            }
+            return duplicateRules;
+        }
+        private set;
+    }
 
     private List<Datacloud.FindDuplicatesResult> results;
     public List<DuplicateRecordSet> existingDuplicateRecordSets = new List<DuplicateRecordSet>();
@@ -85,7 +99,7 @@ public without sharing class FindDuplicates {
                         // Also need to add the object that is currently being reviewed
 
                         DuplicateRecordSet duplicateSet = new DuplicateRecordSet();
-                        duplicateSet.duplicateRuleId = (FindDuplicatesSelector.duplicateRuleIdsByName.get(dupeResult.getDuplicateRule()));
+                        duplicateSet.duplicateRuleId = (duplicateRules.get(dupeResult.getDuplicateRule())).Id;
                         dsi.duplicateSet = duplicateSet;
 
                         DuplicateRecordItem recordItem = new DuplicateRecordItem(
