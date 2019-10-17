@@ -23,12 +23,13 @@ public with sharing class FindDuplicatesSelector {
         ];
     }
 
-    public List<DuplicateRecordItem> selectDuplicateRecordItems(List<SObject> objects) {
+    public static List<DuplicateRecordItem> selectDuplicateRecordItems(List<SObject> objects) {
         return [
             SELECT
                 Id,
                 RecordId,
                 DuplicateRecordSetId,
+                DuplicateRecordSet.Id,
                 DuplicateRecordSet.DuplicateRuleId,
                 DuplicateRecordSet.Name,
                 DuplicateRecordSet.RecordCount
