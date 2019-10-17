@@ -48,9 +48,9 @@ public without sharing class FindDuplicates {
      * creates a DuplicateRecordSet for it if it does not exists already.
      */
     public findDuplicates(List<SObject> sObjects) {
-        Map<Id, DuplicateSetInfo> duplicateSetInfoById = new Map<Id, DuplicateSetInfo>();
+        List<DuplicateSetInfo> duplicateSetInfos = new List<DuplicateSetInfo>();
 
-        List<Datacloud.FindDuplicatesResult> results = Datacloud.FindDuplicates.findDuplicates(sObjects);
+        List<Datacloud.FindDuplicatesResult> results = getResults(sObjects);
 
         for (Integer i = 0, size = sObjects.size(); i < size; i++) {
         
@@ -60,20 +60,15 @@ public without sharing class FindDuplicates {
                     if (matchResult.getSize() <= 0) {//not a duplicate based on this duplicate match rule
                         continue;
                     }
+                    Id recordId = sObjects[i].Id;
 
-                    Id duplicateRuleId = FindDuplicatesSelector.duplicateRuleIdsByName.get(
-                        dupeResult.getDuplicateRule()
+                    DuplicateSetInfo dsi = findDuplicateSet(
+                        recordId, 
+                        dupeResult.getDuplicateRule(), 
+                        duplicateSetInfos
                     );
 
-                    if (!duplicateSetInfoById.containsKey(duplicateRuleId)) {
-                        duplicateSetInfoById.put(duplicateRuleId, new DuplicateSetInfo());
-                    }
-                    DuplicateSetInfo dsi = duplicateSetInfoById.get(duplicateRuleId);
-
-                    dsi.setDuplicateRuleId(duplicateRuleId);
-
-                    dsi.addRecordItem(sObjects[i].Id);
-
+                    dsi.addRecordItem(recordId);
                     for (Datacloud.MatchRecord matchRecord : matchResult.getMatchRecords()) {
                         dsi.addRecordItem((matchRecord.getRecord()).Id);
                     }
@@ -81,7 +76,32 @@ public without sharing class FindDuplicates {
             }
         }
 
-        createRecords(duplicateSetInfoById.values());
+        createRecords(duplicateSetInfos);
+    }
+
+    public List<Datacloud.FindDuplicatesResult> getResults(List<SObject> sObjects) {
+        return Datacloud.FindDuplicates.findDuplicates(sObjects);
+    }
+
+    private DuplicateSetInfo findDuplicateSet(Id recordId, String duplicateRuleName, List<DuplicateSetInfo> duplicateSetInfos) {
+        DuplicateSetInfo dsi;
+        Boolean isFound = false;
+        Id duplicateRuleId = FindDuplicatesSelector.duplicateRuleIdsByName.get(duplicateRuleName);
+
+        for (DuplicateSetInfo info : duplicateSetInfos) {
+            if (info.getDuplicateRuleId() == duplicateRuleId
+                && info.hasRecordItem(recordId)
+            ) {
+                isFound = true;
+                break;
+            }
+        }
+
+        if (!isFound) {
+            dsi = new DuplicateSetInfo(duplicateRuleId);
+        }
+
+        return dsi;
     }
 
     private void createRecords(List<DuplicateSetInfo> duplicateSetInfos) {
@@ -104,8 +124,20 @@ public without sharing class FindDuplicates {
         private DuplicateRecordSet duplicateSet = new DuplicateRecordSet();
         private Map<Id, DuplicateRecordItem> recordItemsById = new Map<Id, DuplicateRecordItem>();
 
-        public void setDuplicateRuleId(Id duplicateRuleId) {
+        public DuplicateSetInfo(Id duplicateRuleId) {
             duplicateSet.duplicateRuleId = duplicateRuleId;
+        }
+
+        public Id getDuplicateRuleId() {
+            return duplicateSet.duplicateRuleId;
+        }
+
+        public DuplicateRecordSet getDuplicateSet() {
+            return duplicateSet;
+        }
+
+        public Boolean hasRecordItem(Id recordId) {
+            return recordItemsById.containsKey(recordId);
         }
 
         public void addRecordItem(Id recordId) {
@@ -115,10 +147,6 @@ public without sharing class FindDuplicates {
                     RecordId = recordId
                 )
             );
-        }
-
-        public DuplicateRecordSet getDuplicateSet() {
-            return duplicateSet;
         }
 
         public List<DuplicateRecordItem> getRecordItems() {
