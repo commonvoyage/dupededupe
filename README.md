@@ -9,6 +9,8 @@ Features:
 - Create Duplicate Record Sets and Duplicate Record Items for existing duplicates
 
 This application is a work in progress. **Install at your own risk.**
+
+
 <a href="https://githubsfdeploy.herokuapp.com?owner=commonvoyage&repo=dupededupe">
   <img alt="Deploy to Salesforce"
        src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
