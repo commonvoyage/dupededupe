@@ -5,7 +5,7 @@ public with sharing class FindDuplicatesSelector {
 
     SELECT DuplicateRuleId, LastReferencedDate, LastViewedDate, Name, RecordCount, ParentId, SobjectType FROM DuplicateRecordSet
 */
-    public List<DuplicateRecordSet> selectDuplicateRecordSets (List<SObject> objects) {
+    public List<DuplicateRecordSet> selectDuplicateRecordSets(List<SObject> objects) {
         return [
             SELECT 
                 Id,
@@ -21,6 +21,35 @@ public with sharing class FindDuplicatesSelector {
             //WHERE
                 //ParentId IN :objects
         ];
+    }
+
+    public List<DuplicateRecordItem> selectDuplicateRecordItems(List<SObject> objects) {
+        return [
+            SELECT
+                Id,
+                RecordId,
+                DuplicateRecordSetId,
+                DuplicateRecordSet.DuplicateRuleId,
+                DuplicateRecordSet.Name,
+                DuplicateRecordSet.RecordCount
+            FROM DuplicateRecordItem
+            WHERE RecordId IN :objects
+        ];
+    }
+
+    public static Map<String, Id> duplicateRuleIdsByName {
+        public get {
+            if (duplicateRuleIdsByName == null) {
+                duplicateRuleIdsByName = new Map<String, Id>();
+                
+                List<DuplicateRule> dupeRules = [SELECT Id, DeveloperName FROM DuplicateRule];
+                for (DuplicateRule dr : dupeRules) {
+                    duplicateRuleIdsByName.put(dr.DeveloperName, dr.id);
+                }
+            }
+            return duplicateRuleIdsByName;
+        }
+        private set;
     }
 }
 /*
