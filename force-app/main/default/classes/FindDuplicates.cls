@@ -1,3 +1,16 @@
+
+/* *********************************
+ * DuplicateFinder Class 
+ * @description     This class uses the built in duplicate search feature of salesforce to identify
+ *                  duplicates in a bulk manner
+ *
+ *                  Class should be run without sharing so that all records can be searched
+ *
+ *                  Class should implement the queueable interface so that it can iteratively process 
+ *                  all the records in the organization
+ *
+ * copied from https://github.com/patrick-yan-sf/FindDuplicates/blob/master/src/classes/DuplicateFinder.cls
+ */
 public without sharing class FindDuplicates {
 
     private List<Datacloud.FindDuplicatesResult> results;
@@ -9,13 +22,13 @@ public without sharing class FindDuplicates {
         results = Datacloud.FindDuplicates.findDuplicates(objects);
         //existingDuplicateRecordSets = FindDuplicatesSelector.selectDuplicateRecordSets(objects);
 
-        for (Datacloud.FindDuplicatesResult findDupeResult : results) {
+        for (Datacloud.FindDuplicatesResult result : results) {
             //One FindDuplicatesResult per object in list; methods:
             //List<Datacloud.DuplicateResult> getDuplicateResults()
             //List<Database.Error> getErrors()
             //Boolean isSuccess()
 
-            for (Datacloud.DuplicateResult dupeResult : findDupeResult.getDuplicateResults()) {
+            for (Datacloud.DuplicateResult dupeResult : result.getDuplicateResults()) {
                 //One DuplicateResult per active Duplicate Rule for this object
 
                 for (Datacloud.MatchResult matchResult : dupeResult.getMatchResults()) {
@@ -30,119 +43,90 @@ public without sharing class FindDuplicates {
         }
     }*/
 
-/* *********************************
- * DuplicateFinder Class 
- * @description     This class uses the built in duplicate search feature of salesforce to identify
- *                  duplicates in a bulk manner
- *
- *                  Class should be run without sharing so that all records can be searched
- *
- *                  Class should implement the queueable interface so that it can iteratively process 
- *                  all the records in the organization
- */
+    /***
+     * @description Determines if the SObject is a duplicate and if so, 
+     * creates a DuplicateRecordSet for it if it does not exists already.
+     */
+    public findDuplicates(List<SObject> sObjects) {
+        Map<Id, DuplicateSetInfo> duplicateSetInfoById = new Map<Id, DuplicateSetInfo>();
 
-//copied from https://github.com/patrick-yan-sf/FindDuplicates/blob/master/src/classes/DuplicateFinder.cls
+        List<Datacloud.FindDuplicatesResult> results = Datacloud.FindDuplicates.findDuplicates(sObjects);
 
-
-
-    /*public List<DuplicateSetInfo> findAllDuplicateContacts() {
-        List<Contact> contacts = [SELECT Id, Name, Email, Phone FROM Contact LIMIT 200];
-        return findDuplicates(contacts);
-    }*/
-
-    public FindDuplicates(List<SObject> objects) {
-        Set<String> currentDupIds = new Set<String>();
-
-        List<Datacloud.FindDuplicatesResult> results = Datacloud.FindDuplicates.findDuplicates(objects);
-
-        List<DuplicateSetInfo> duplicateSets = new List<DuplicateSetInfo>();
-        List<DuplicateRecordSet> parentRecords = new List<DuplicateRecordSet>(); 
-
-        // Each record in the original list will result in a find duplicate result object
-        Integer recordSearchSize = objects.size();
-
-        for (Integer i = 0; i<recordSearchSize; i++) {
-            String listRecordId = objects[i].Id;
-            // skip if record is already in a previous duplicate Set
-            if (currentDupIds.contains(listRecordId)) {
-                continue;
-            }
-
-            Datacloud.FindDuplicatesResult findDupeResult = results[i];
+        for (Integer i = 0, size = sObjects.size(); i < size; i++) {
         
-            for (Datacloud.DuplicateResult dupeResult : findDupeResult.getDuplicateResults()) {
+            for (Datacloud.DuplicateResult dupeResult : results[i].getDuplicateResults()) {
         
                 for (Datacloud.MatchResult matchResult : dupeResult.getMatchResults()) {
-        
-                    // basically if it is a duplicate then create a set for it
-                    if (matchResult.getSize() > 0) {
-                        Boolean addToInsertList = false;
-                        // Need to create one for the current record as well
-                        System.debug('Found a match: ' + matchResult);
-                        // need to add the duplicate record id to a list so that we do not try to create 
-                        // another set for it
-                        DuplicateSetInfo dsi = new DuplicateSetInfo();
-                        // Also need to add the object that is currently being reviewed
+                    if (matchResult.getSize() <= 0) {//not a duplicate based on this duplicate match rule
+                        continue;
+                    }
 
-                        DuplicateRecordSet duplicateSet = new DuplicateRecordSet();
-                        duplicateSet.duplicateRuleId = (FindDuplicatesSelector.duplicateRuleIdsByName.get(dupeResult.getDuplicateRule()));
-                        dsi.duplicateSet = duplicateSet;
+                    Id duplicateRuleId = FindDuplicatesSelector.duplicateRuleIdsByName.get(
+                        dupeResult.getDuplicateRule()
+                    );
 
-                        DuplicateRecordItem recordItem = new DuplicateRecordItem(
-                            RecordId = listRecordId
-                        );
-                        dsi.duplicateItems.add(recordItem);
+                    if (!duplicateSetInfoById.containsKey(duplicateRuleId)) {
+                        duplicateSetInfoById.put(duplicateRuleId, new DuplicateSetInfo());
+                    }
+                    DuplicateSetInfo dsi = duplicateSetInfoById.get(duplicateRuleId);
 
-                        for (Datacloud.MatchRecord matchRecord : matchResult.getMatchRecords()) {
-                            DuplicateRecordItem duplicateItem = new DuplicateRecordItem(
-                                RecordId = (matchRecord.getRecord()).Id
-                            );
+                    dsi.setDuplicateRuleId(duplicateRuleId);
 
-                            currentDupIds.add(duplicateItem.RecordId);
-                            dsi.duplicateItems.add(duplicateItem);
-                            addToInsertList = true;
-                        }
+                    dsi.addRecordItem(sObjects[i].Id);
 
-                        if (addToInsertList) {
-                            parentRecords.add(duplicateSet);
-                            duplicateSets.add(dsi);
-                        }
+                    for (Datacloud.MatchRecord matchRecord : matchResult.getMatchRecords()) {
+                        dsi.addRecordItem((matchRecord.getRecord()).Id);
                     }
                 }
             }
         }
 
-
-        // save the top level duplicate set first
-        //THIS IS CREATING DUPLICATE DUPLICATE RECORD SETS LOL
-        if (!parentRecords.isEmpty()) {
-            System.debug('duplicateSets ' + duplicateSets);
-            System.debug('parentRecords ' + parentRecords);
-            insert parentRecords;
-
-            List<DuplicateRecordItem> childRecords = new List<DuplicateRecordItem>();
-            for (DuplicateSetInfo dsi : duplicateSets) {
-                dsi.prepareForInsert();
-                childRecords.addAll(dsi.duplicateItems);
-            }
-
-            System.debug('childRecords ' + childRecords);
-            insert childRecords;
-        }
+        createRecords(duplicateSetInfoById.values());
     }
 
-    public class DuplicateSetInfo {
-        public DuplicateRecordSet duplicateSet;
-        public List<DuplicateRecordItem> duplicateItems;
+    private void createRecords(List<DuplicateSetInfo> duplicateSetInfos) {
+        List<DuplicateRecordSet> duplicateSets = new List<DuplicateRecordSet>();
+        List<DuplicateRecordItem> recordItems = new List<DuplicateRecordItem>();
 
-        public DuplicateSetInfo() {
-            duplicateItems = new List<DuplicateRecordItem>();
+        for (DuplicateSetInfo info : duplicateSetInfos) {
+            duplicateSets.add(info.getDuplicateSet());
+        }
+        insert duplicateSets;
+
+        for (DuplicateSetInfo info : duplicateSetInfos) {
+            recordItems.addAll(info.getRecordItems());
+        }
+        insert recordItems;
+    }
+
+
+    public class DuplicateSetInfo {
+        private DuplicateRecordSet duplicateSet = new DuplicateRecordSet();
+        private Map<Id, DuplicateRecordItem> recordItemsById = new Map<Id, DuplicateRecordItem>();
+
+        public void setDuplicateRuleId(Id duplicateRuleId) {
+            duplicateSet.duplicateRuleId = duplicateRuleId;
         }
 
-        public void prepareForInsert() {
-            for (DuplicateRecordItem recordItem : duplicateItems) {
-                recordItem.DuplicateRecordSetId = duplicateSet.Id;
+        public void addRecordItem(Id recordId) {
+            recordItemsById.put(
+                recordId, 
+                new DuplicateRecordItem(
+                    RecordId = recordId
+                )
+            );
+        }
+
+        public DuplicateRecordSet getDuplicateSet() {
+            return duplicateSet;
+        }
+
+        public List<DuplicateRecordItem> getRecordItems() {
+            for (DuplicateRecordItem item : recordItemsById.values()) {
+                item.DuplicateRecordSetId = duplicateSet.Id;
             }
+
+            return recordItemsById.values();
         }
     }
 }
