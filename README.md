@@ -1,5 +1,5 @@
 
-# Dupe Dedupe - BETA
+# [Dupe Dedupe](https://www.youtube.com/watch?v=4vaN01VLYSQ) - BETA
 **Tools for managing duplicates in Salesforce**
 
 Dupe Dedupe leverages Salesforce Duplicate Rules to help manage duplicate records on the Account, Contact, Individual and Lead objects.
