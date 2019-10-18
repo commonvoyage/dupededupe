@@ -42,11 +42,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>Active__c</field>
-            <table>Account</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <field>AnnualRevenue</field>
             <table>Account</table>
         </columns>
@@ -112,11 +107,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>CustomerPriority__c</field>
-            <table>Account</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <field>DandbCompany</field>
             <table>Account</table>
         </columns>
@@ -173,11 +163,6 @@
         <columns>
             <checkedByDefault>false</checkedByDefault>
             <field>NaicsDesc</field>
-            <table>Account</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>NumberofLocations__c</field>
             <table>Account</table>
         </columns>
         <columns>
@@ -257,21 +242,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>SLA__c</field>
-            <table>Account</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>SLAExpirationDate__c</field>
-            <table>Account</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>SLASerialNumber__c</field>
-            <table>Account</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <field>TickerSymbol</field>
             <table>Account</table>
         </columns>
@@ -283,11 +253,6 @@
         <columns>
             <checkedByDefault>false</checkedByDefault>
             <field>Type</field>
-            <table>Account</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>UpsellOpportunity__c</field>
             <table>Account</table>
         </columns>
         <columns>
