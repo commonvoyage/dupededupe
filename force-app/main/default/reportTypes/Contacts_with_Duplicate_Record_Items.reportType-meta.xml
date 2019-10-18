@@ -132,11 +132,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>Languages__c</field>
-            <table>Contact</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <field>LastActivityDate</field>
             <table>Contact</table>
         </columns>
@@ -168,11 +163,6 @@
         <columns>
             <checkedByDefault>false</checkedByDefault>
             <field>LeadSource</field>
-            <table>Contact</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Level__c</field>
             <table>Contact</table>
         </columns>
         <columns>
