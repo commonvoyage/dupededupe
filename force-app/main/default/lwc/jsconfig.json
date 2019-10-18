@@ -2,7 +2,14 @@
     "compilerOptions": {
         "experimentalDecorators": true,
         "baseUrl": ".",
-        "paths": {}
+        "paths": {
+            "c/MergeUI": [
+                "MergeUI/MergeUI.js"
+            ],
+            "c/mergeUI": [
+                "mergeUI/mergeUI.js"
+            ]
+        }
     },
     "include": [
         "**/*",

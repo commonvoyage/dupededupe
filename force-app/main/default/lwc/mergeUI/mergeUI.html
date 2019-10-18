@@ -1,0 +1,28 @@
+<template>
+    <lightning-card
+            variant="narrow"
+            icon-name="standard:opportunity">
+        <h1 slot="title">Merge User Interface</h1>
+        <h1>Hey There</h1>
+        <div slot="actions">
+            <lightning-button-icon icon-name="utility:down"></lightning-button-icon>
+        </div>
+        <div>
+            <label for="objectSelect" class="slds-form-element__label slds-no-flex">
+                <abbr title="required" class="slds-required">*</abbr>
+                Object
+            </label>
+            <lightning-combobox
+               name="objectSelect"
+               value={value}
+               placeholder="Choose your object"
+               options={objectOptions}
+               onchange={handleObjectChange} >
+            </lightning-combobox>
+            <p>Selected value is: {value}</p>
+        </div>
+        <div slot="footer">
+            <h6>This is the footer</h6>
+        </div>
+    </lightning-card>    
+</template>
